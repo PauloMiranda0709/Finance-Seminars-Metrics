@@ -6,7 +6,7 @@ if size(parameter_vector,1) == 5
     alpha     = parameter_vector(3,1);
     beta      = parameter_vector(4,1);
     nu        = parameter_vector(5,1);
-    %T         = size(returns,1);
+    %T        = size(returns,1);
 
     % Run the GARCH filter
     [ sigmasquared ] = Filter_GARCH(mu,omega,alpha,beta,returns);
