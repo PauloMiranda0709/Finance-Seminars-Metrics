@@ -1,4 +1,7 @@
 function [mu_hat, omega_hat, alpha_hat_1, alpha_hat_2, beta_hat, nu_hat, sigmasquared, epsilon_GARCH, NIC_GARCH, NegativeLogLikelihood1] = doAsymGARCH(startingvalues, returns)
+
+format short
+clear  NegativeLogLikelihood_GARCH
 NegativeLogLikelihood_GARCH(startingvalues,returns)
 
 %% Clear any pre-existing options
@@ -42,3 +45,4 @@ condition = epsilon_GARCH > 0;
 indicator_function = condition;
 
 NIC_GARCH       = alpha_hat_1 * (epsilon_GARCH.^2 .* (1-indicator_function)-(1/2)) + alpha_hat_2 * (epsilon_GARCH.^2 .* (1-indicator_function)-(1/2));
+end

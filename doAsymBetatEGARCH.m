@@ -1,4 +1,7 @@
 function [mu_hat,lambda_hat,phi_hat,kappa_hat,kappa_tilde_hat,nu_hat,sigmas,u,v,lambdas,NegativeLogLikelihood1,epsilon_EGARCH, NIC_EGARCH,AIC,BIC] = doAsymBetatEGARCH(startingvalues, returns)
+
+format short
+clear  NegativeLogLikelihood_GARCH
 NegativeLogLikelihood_BetaGARCH(startingvalues,returns)
 
 %% Clear any pre-existing options
@@ -38,3 +41,4 @@ epsilon_EGARCH   = ( returns - mu_hat ) ./ sigmas;
 NIC_EGARCH       = kappa_hat*2*u+2*kappa_tilde_hat*v;
 %% AIC & BIC
 [AIC, BIC] = informationCriterions(size(ML_parameters,1), size(returns,1), NegativeLogLikelihood1);
+end

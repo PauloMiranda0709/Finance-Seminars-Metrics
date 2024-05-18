@@ -5,91 +5,99 @@ close all
 load('data')
 dates_str = cellstr(num2str(dates));
 dates     = datetime(dates_str, 'InputFormat', 'yyyyMMdd');
-split = 0.8;
-split_date = round(size(rv5,1)*split);
-split_date = int64(split_date);
 
-train_rv5 = rv5(1:split_date);
-train_rvc = returns(1:split_date);
-test_rv5 = rv5(split_date:end);
-test_rvc = returns (split_date:end);
+%start_value = length(rv5)/2;
+start_value = length(rv5)-4;
+end_value = length(rv5);
+splitdates = start_value:end_value;
 
-format short
-clear  NegativeLogLikelihood_GARCH
-%% asymmetric GARCH
-% startingvalues = [mu,sigma2,alpha1,aplha2,beta,nu]
-startingvalues=[mean(returns);var(returns)/20;0.10;0.10;0.88;6];
-[mu_hat_GARCH, omega_hat, alpha_hat_1, alpha_hat_2, beta_hat, nu_hat_GARCH, sigmasquared, epsilon_GARCH, NIC_GARCH, NegativeLogLikelihood1_GARCH] = doAsymGARCH(startingvalues,train_rvc);
+Pvol_GARCHs_rvc_1 = zeros(length(splitdates),1);
+Pvol_GARCHs_rvc_5 = zeros(length(splitdates),1);
+Pvol_GARCHs_rvc_21 = zeros(length(splitdates),1);
+Pvol_GARCHs_rv5_1 = zeros(length(splitdates),1);
+Pvol_GARCHs_rv5_5 = zeros(length(splitdates),1);
+Pvol_GARCHs_rv5_21 = zeros(length(splitdates),1);
+Pvol_EGARCHs_rvc_1 = zeros(length(splitdates),1);
+Pvol_EGARCHs_rvc_5 = zeros(length(splitdates),1);
+Pvol_EGARCHs_rvc_21 = zeros(length(splitdates),1);
+Pvol_EGARCHs_rv5_1 = zeros(length(splitdates),1);
+Pvol_EGARCHs_rv5_5 = zeros(length(splitdates),1);
+Pvol_EGARCHs_rv5_21 = zeros(length(splitdates),1);
+Pvol_VIXs_rvc_1 = zeros(length(splitdates),1);
+Pvol_VIXs_rvc_5 = zeros(length(splitdates),1);
+Pvol_VIXs_rvc_21 = zeros(length(splitdates),1);
+Pvol_VIXs_rv5_1 = zeros(length(splitdates),1);
+Pvol_VIXs_rv5_5 = zeros(length(splitdates),1);
+Pvol_VIXs_rv5_21 = zeros(length(splitdates),1);
+Pvol_HARRVs_rvc_1 = zeros(length(splitdates),1);
+Pvol_HARRVs_rvc_5 = zeros(length(splitdates),1);
+Pvol_HARRVs_rvc_21 = zeros(length(splitdates),1);
+Pvol_HARRVs_rv5_1 = zeros(length(splitdates),1);
+Pvol_HARRVs_rv5_5 = zeros(length(splitdates),1);
+Pvol_HARRVs_rv5_21 = zeros(length(splitdates),1);
 
-%% asymmetric Beta_t_EGARCH
-% startingvalues = [mu,lambda,phi,kappa,kappa_tilde, nu]
-startingvalues=[mean(returns);log(var(returns));0.40;0.88;0.88;6]; 
-[mu_hat_EGARCH,lambda_hat,phi_hat,kappa_hat,kappa_tilde_hat,nu_hat_EGARCH,sigmas,u,v,lambdas,NegativeLogLikelihood1_EGARCH,epsilon_EGARCH, NIC_EGARCH,AIC,BIC] = doAsymBetatEGARCH(startingvalues,train_rvc);
+ds = [1,5,21];
+for idx = 1:length(ds)
+    d = ds(idx);
+    Pvol_GARCHs_rvc = zeros(length(splitdates),1);
+    Pvol_EGARCHs_rvc = zeros(length(splitdates),1);
+    Pvol_VIXs_rvc = zeros(length(splitdates),1);
+    Pvol_HARRVs_rvc = zeros(length(splitdates),1);
+    Pvol_GARCHs_rv5 = zeros(length(splitdates),1);
+    Pvol_EGARCHs_rv5 = zeros(length(splitdates),1);
+    Pvol_VIXs_rv5 = zeros(length(splitdates),1);
+    Pvol_HARRVs_rv5 = zeros(length(splitdates),1);
+    for t = 1:length(splitdates)
+        split_date = splitdates(t);
 
-%% Predictions
-d = 5;
+        train_rv5 = rv5(1:split_date);
+        train_rvc = returns(1:split_date);
+        test_rv5 = rv5(split_date:end);
+        test_rvc = returns (split_date:end);
+    
+   
+        [Pvol_GARCH_rvc,Pvol_EGARCH_rvc,Pvol_VIX_rvc,Pvol_HARRV_rvc] = doRollingWindow(train_rvc,test_rvc, vix, split_date, "rvc", d);
+        [Pvol_GARCH_rv5,Pvol_EGARCH_rv5,Pvol_VIX_rv5,Pvol_HARRV_rv5] = doRollingWindow(train_rv5,test_rv5, vix, split_date, "rv5", d);
+        
 
-% GARCH
-[Pvol_GARCH] = predictGARCH(sigmasquared,mu_hat_GARCH,omega_hat,alpha_hat_1,alpha_hat_2,beta_hat,d);
-% Pvol_t
-Pvol_GARCH_t = Pvol_GARCH(end);
+        Pvol_GARCHs_rvc(t) = Pvol_GARCH_rvc;
+        Pvol_EGARCHs_rvc(t) = Pvol_EGARCH_rvc;
+        Pvol_VIXs_rvc(t) = Pvol_VIX_rvc;
+        Pvol_HARRVs_rvc(t) = Pvol_HARRV_rvc;
+        Pvol_GARCHs_rv5(t) = Pvol_GARCH_rv5;
+        Pvol_EGARCHs_rv5(t) = Pvol_EGARCH_rv5;
+        Pvol_VIXs_rvc(t) = Pvol_VIX_rv5;
+        Pvol_HARRVs_rv5(t) = Pvol_HARRV_rv5;
+        
+    end
+    if d == 1
+        Pvol_GARCHs_rvc_1 = Pvol_GARCHs_rvc;
+        Pvol_GARCHs_rv5_1 = Pvol_GARCHs_rv5;
+        Pvol_EGARCHs_rvc_1 = Pvol_EGARCHs_rvc;
+        Pvol_EGARCHs_rv5_1 = Pvol_EGARCHs_rv5;
+        Pvol_VIXs_rvc_1 = Pvol_VIXs_rvc;
+        Pvol_VIXs_rv5_1 = Pvol_VIXs_rv5;
+        Pvol_HARRVs_rvc_1 = Pvol_HARRVs_rvc;
+        Pvol_HARRVs_rv5_1 = Pvol_HARRVs_rv5;
+    elseif d == 5
+        Pvol_GARCHs_rvc_5 = Pvol_GARCHs_rvc;
+        Pvol_GARCHs_rv5_5 = Pvol_GARCHs_rv5;
+        Pvol_EGARCHs_rvc_5 = Pvol_EGARCHs_rvc;
+        Pvol_EGARCHs_rv5_5 = Pvol_EGARCHs_rv5;
+        Pvol_VIXs_rvc_5 = Pvol_VIXs_rvc;
+        Pvol_VIXs_rv5_5 = Pvol_VIXs_rv5;
+        Pvol_HARRVs_rvc_5 = Pvol_HARRVs_rvc;
+        Pvol_HARRVs_rv5_5 = Pvol_HARRVs_rv5;
+    elseif d == 21
+        Pvol_GARCHs_rvc_21 = Pvol_GARCHs_rvc;
+        Pvol_GARCHs_rv5_21 = Pvol_GARCHs_rv5;
+        Pvol_EGARCHs_rvc_21 = Pvol_EGARCHs_rvc;
+        Pvol_EGARCHs_rv5_21 = Pvol_EGARCHs_rv5;
+        Pvol_VIXs_rvc_21 = Pvol_VIXs_rvc;
+        Pvol_VIXs_rv5_21 = Pvol_VIXs_rv5;
+        Pvol_HARRVs_rvc_21 = Pvol_HARRVs_rvc;
+        Pvol_HARRVs_rv5_5 = Pvol_HARRVs_rv5;
+    end 
+end
 
-% EGARCH
-[Pvol_EGARCH] = predictEGARCH(sigmas,mu_hat_EGARCH,lambda_hat,phi_hat,kappa_hat,kappa_tilde_hat,d);
-Pvol_EGARCH_t = Pvol_EGARCH(end);
-
-%% Actual volatilities
-% using rvc
-rvc1 = test_rvc(1);
-rvc5 = sum(test_rvc(1:5));
-rvc21 = sum(test_rvc(1:21));
-
-% using rv5
-rv5_1 = 1.4 * test_rv5(1);
-rv5_5 = 1.4 * sum(test_rv5(1:5));
-rv5_21 = 1.4 * sum(test_rv5(1:21));
-%% Benchmarks
-% VIX
-Pvol_VIX = d/250*vix.^2;
-Pvol_VIX_t = Pvol_VIX(split_date+1);
-% HAR-RV
-[Pvol_HAR_RV_ctcr, Pvol_HAR_RV_rv5] = doHARRV(train_rvc, test_rvc, train_rv5, test_rv5,rv5, d);
-Pvol_HAR_RV_rv5_t = Pvol_HAR_RV_rv5(1);
-%% Plots
-
-% Plot the predicted volatility for GARCH
-figure
-plot(Pvol_GARCH);
-
-% Add labels to the plot
-xlabel('Index');
-ylabel('Value');
-title('Plot of GARCH predictions');
-
-
-% Plot the predicted volatility for Beta-t-EGARCH
-figure
-plot(Pvol_EGARCH);
-
-% Add labels to the plot
-xlabel('Index');
-ylabel('Value');
-title('Plot of Beta-t-EGARCH predictions');
-
-% Plot the predicted volatility for VIX
-figure
-plot(Pvol_VIX);
-
-% Add labels to the plot
-xlabel('Index');
-ylabel('Value');
-title('Plot of VIX predictions');
-
-% Plot the predicted volatility for HAR-RV
-figure
-plot(Pvol_HAR_RV_rv5);
-
-% Add labels to the plot
-xlabel('Index');
-ylabel('Value');
-title('Plot of HAR-RV predictions');
+Pvol_GARCHs_rvc_1
