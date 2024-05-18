@@ -7,7 +7,7 @@ dates_str = cellstr(num2str(dates));
 dates     = datetime(dates_str, 'InputFormat', 'yyyyMMdd');
 
 %start_value = length(rv5)/2;
-start_value = length(rv5)-4;
+start_value = length(rv5)-10;
 end_value = length(rv5);
 splitdates = start_value:end_value;
 
@@ -100,4 +100,21 @@ for idx = 1:length(ds)
     end 
 end
 
-Pvol_GARCHs_rvc_1
+Pvol_lists_rvc = [Pvol_GARCHs_rvc_1, Pvol_GARCHs_rvc_5, Pvol_GARCHs_rvc_21, Pvol_EGARCHs_rvc_1, Pvol_EGARCHs_rvc_5, Pvol_EGARCHs_rvc_21, Pvol_VIXs_rvc_1, Pvol_VIXs_rvc_5, Pvol_VIXs_rvc_21, Pvol_HARRVs_rvc_1, Pvol_HARRVs_rvc_5, Pvol_HARRVs_rvc_21];
+Pvol_lists_rv5 = [Pvol_GARCHs_rv5_1, Pvol_GARCHs_rv5_5, Pvol_GARCHs_rv5_21, Pvol_EGARCHs_rv5_1, Pvol_EGARCHs_rv5_5, Pvol_EGARCHs_rv5_21, Pvol_VIXs_rv5_1, Pvol_VIXs_rv5_5, Pvol_VIXs_rv5_21, Pvol_HARRVs_rv5_1, Pvol_HARRVs_rv5_5, Pvol_HARRVs_rv5_21];
+
+%% MSE and QLIKE
+actual_rvc = returns((end-length(Pvol_lists_rvc)):end);
+actual_rv5 = rv5((end-length(Pvol_lists_rv5)):end);
+MSEs_rvc = zeros(length(Pvol_lists_rvc),1);
+MSEs_rv5 = zeros(length(Pvol_lists_rv5),1);
+Qlike_rvc = zeros(length(Pvol_lists_rvc),1);
+Qlike_rv5 = zeros(length(Pvol_lists_rv5),1);
+for i = 1:length(Pvol_lists_rvc)
+    [MSEs_rvc(i)] = doMSE(Pvol_lists_rvc(i), actual_rvc);
+    [MSEs_rv5(i)] = doMSE(Pvol_lists_rvc(i), actual_rv5);
+    [Qlike_rvc(i)] = doQLIKE(Pvol_lists_rvc(i), actual_rvc);
+    [Qlike_rv5(i)] = doQLIKE(Pvol_lists_rv5(i), actual_rv5);
+end
+MSEs_rvc
+    

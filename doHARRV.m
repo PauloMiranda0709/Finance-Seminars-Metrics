@@ -6,7 +6,7 @@ n_train_h = n_train - h;
 %% Target varaices
 if category == "rvc"
     % target variance 1
-    tv1 = train_rv;
+    tv1 = train_rv.^2;
     targetvarh = zeros(n_train_h, 1);
     for t = 1:n_train_h
         targetvarh(t) = sum(tv1(t+1:t+h));
