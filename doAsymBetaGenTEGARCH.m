@@ -1,8 +1,4 @@
 function [mu_hat, lambda_hat, phi_hat, kappa_hat, kappa_tilde_hat, eta1_hat, eta2_hat, nu1_hat, nu2_hat, alpha_hat, epsilon_GARCH, NegativeLogLikelihood1, NIC_GARCH, AIC, BIC] = doAsymBetaGenTEGARCH(returns)
-%Beta-t-EGARCH symmetric
-%% Clear all data 
-clear
-close all
 %% Estimate Beta-Gen-t-EGARCH model
 format short
 clear  NegativeLogLikelihood_GenBetaTEGARCH
@@ -11,10 +7,6 @@ clear  NegativeLogLikelihood_GenBetaTEGARCH
 % Starting values
 % startingvalues = [mu,lambda,phi,kappa, kappa_tilde, eta1, eta2, nu1, nu2, alpha]
 startingvalues=[mean(returns); log(var(returns)); 0.40; 0.88; 1; 1; 1; 1; 1; 0.5]; 
-
-% Get the negative log likelihood at the starting values (the optimiser
-% should beat this!) 
-NegativeLogLikelihood_GenBetaTEGARCH(startingvalues, returns)
 
 %% Clear any pre-existing options
 clearvars options
@@ -57,8 +49,5 @@ alpha_hat        = ML_parameters(10);
 epsilon_GARCH   = (returns - mu_hat) ./ sigmas;
 NIC_GARCH       = kappa_hat*2*u+2*kappa_tilde_hat*v;
 %% Check that the implied shocks have approximately the desired characteristics (mean zero, variance one)
-disp([mean(epsilon_GARCH);var(epsilon_GARCH)])
-% should be roughly [0;1]
-
 %%Calculate AIC and BIC
 [AIC, BIC] = informationCriterions(size(ML_parameters,1), size(returns,1), NegativeLogLikelihood1);
